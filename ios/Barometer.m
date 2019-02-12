@@ -37,9 +37,14 @@ RCT_REMAP_METHOD(isAvailable,
 - (void) isAvailableWithResolver:(RCTPromiseResolveBlock) resolve
                         rejecter:(RCTPromiseRejectBlock) reject {
 
-    if ([CMAltimeter isRelativeAltitudeAvailable]) 
+    if ([CMAltimeter isRelativeAltitudeAvailable])
     {
-        resolve(@YES);
+        if([CMAltimeter authorizationStatus] == CMAuthorizationStatusAuthorized)
+        {
+            resolve(@YES);
+        } else {
+            reject(@"-1", @"Barometer is not authorized", nil);
+        }
     }
     else
     {
@@ -63,13 +68,13 @@ RCT_EXPORT_METHOD(startUpdates) {
         if (error) {
             NSLog(@"error while getting sensor data");
         }
-        
+
         if (altitudeData) {
             [self.bridge.eventDispatcher sendDeviceEventWithName:@"Barometer" body:@{
                 @"pressure" : @(altitudeData.pressure.doubleValue * 10.0)
             }];
         }
-        
+
     }];
 }
 
